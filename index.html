@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="main.css" />
+        <title>SnakeAI</title>
+        <script src="SnakeAI.js"></script>
+        <script src="rng.js"></script>
+        <script>
+            function DomLoad() {
+                const board = document.querySelector("#board").getContext("2d");
+                const info = document.querySelector("#info").getContext("2d");
+                initSnakes();
+                setInterval(() => nextFrame(board, info), 10);
+            }
+        </script>
+    </head>
+    <body onload="DomLoad()">
+        <canvas id="board" width="500" height="500"></canvas>
+        <canvas id="info" width="300" height="500"></canvas>
+    </body>
+</html>
