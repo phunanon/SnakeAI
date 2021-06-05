@@ -1,7 +1,5 @@
 {
-    "files": ["src/Brain.ts", "src/Snake.ts"],
     "include": ["src/*"],
-    "exclude": [""],
     "compilerOptions": {
         "target": "esNext",
         "lib": ["ESNext", "DOM"],

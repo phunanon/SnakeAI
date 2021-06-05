@@ -14,30 +14,56 @@ const mutant = (brain, rn, rate = .2) => brain.map(l => l.map(({ bias, weights }
     bias: rn() < rate ? rn() : bias,
     weights: weights.map(w => (rn() < rate ? rn() * 2 - 1 : w)),
 })));
-/// <reference path="Brain.ts" />
-const timeout = 100, w = 16, h = 16;
-let rng;
-let snakes;
-let defaultSnake;
-let snake;
-function initSnakes() {
-    rng = new RNG("...");
-    snakes = vec(100)
-        .map(n => mutant(brain(12, 12, 4, 2), () => rng.uniform()))
-        .map(brain => ({ brain, ate: 0, age: 0 }));
-    defaultSnake = () => ({
-        head: { x: w / 2, y: h / 2 },
-        food: { x: Math.floor(w / 3), y: Math.floor(h / 3) },
-        body: vec(h).map(y => vec(w)),
-        ate: 0,
-        age: 0,
-        rng: new RNG("."),
-    });
-    snake = defaultSnake();
+function draw({ brain, body, head, food, ate, age }, message, board, info) {
+    const [height, width] = [body.length, body[0].length];
+    board.clearRect(0, 0, board.canvas.width, board.canvas.height);
+    board.save();
+    board.scale(board.canvas.width / width, board.canvas.height / height);
+    //Draw Snake body & head
+    board.fillStyle = "#000";
+    body.forEach((row, y) => row.forEach((dot, x) => dot && board.fillRect(x, y, 1, 1)));
+    board.fillRect(head.x, head.y, 1, 1);
+    //Draw food
+    board.fillStyle = "#d00";
+    board.fillRect(food.x, food.y, 1, 1);
+    //Draw info
+    info.clearRect(0, 0, info.canvas.width, info.canvas.height);
+    info.fillStyle = "#000";
+    info.font = "12px Arial";
+    info.fillText(`ate ${ate}, age ${age}, ${message}`, 12, 24);
+    drawBrain(brain, info);
+    board.restore();
 }
-const view = { generation: 0, snake: 0 };
-function think(brain) {
-    const { head, food, body } = snake;
+function drawBrain(brain, info) {
+    const margin = 1.2;
+    info.save();
+    info.translate(32, 48);
+    info.scale(24, 24);
+    brain.forEach((l, x) => l.forEach((n, y) => {
+        //Bias
+        const B = n.bias * 255;
+        info.fillStyle = `rgb(${255 - B}, ${255 - B}, ${255 - B})`;
+        info.fillRect(x * margin - .1, y * margin - .1, margin, margin);
+        //Result
+        let r = n.bias;
+        let R = (r < 0 ? r * -255 : 0), G = (r > 0 ? r * 255 : 0);
+        info.fillStyle = `rgb(${255 - G}, ${255 - R}, ${255 - R - G})`;
+        info.fillRect(x * margin, y * margin, 1, 1);
+    }));
+    info.restore();
+}
+const w = 16, h = 16, timeout = (w + h) * 2;
+const birth = (brain) => ({
+    brain,
+    head: { x: w / 2, y: h / 2 },
+    food: { x: Math.floor(w / 3), y: Math.floor(h / 3) },
+    body: vec(h).map(y => vec(w)),
+    ate: 0,
+    age: 0,
+    hunger: 0,
+    rng: new RNG("."),
+});
+function think({ brain, head, food, body }) {
     const noN = !head.y, noE = head.x == w - 1, noS = head.y == h - 1, noW = !head.x;
     const inputs = [
         ...[noN, noE, noS, noW],
@@ -52,79 +78,80 @@ function think(brain) {
     ];
     return next(brain, inputs.map(b => (b ? 1 : 0)));
 }
-function nextAct() {
-    const { brain } = snakes[view.snake];
-    const { head, food, body, ate, age } = snake;
-    const [N, E, S, W] = think(brain);
+//Modifies the snake parameter with its next state
+function nextState(snake) {
+    const { head, food, body, rng } = snake;
+    const [N, E, S, W] = think(snake);
     const most = Math.max(N, E, S, W);
     head.y += most == S ? 1 : most == N ? -1 : 0;
     head.x += most == N || most == S ? 0 : most == E ? 1 : -1;
-    //If snake ate
-    if (head.x == food.x && head.y == food.y) {
-        ++snake.ate;
-        food.x = Math.floor(snake.rng.uniform() * w);
-        food.y = Math.floor(snake.rng.uniform() * h);
-    }
     //If snake died
     if (head.x < 0 ||
         head.x == body[0].length ||
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        age > timeout) {
-        //Save snake stats
-        snakes[view.snake++] = { brain, ate: snake.ate, age: snake.age };
-        //Reset snake
-        snake = defaultSnake();
-        //If we've reached the end of the generation
-        if (view.snake == snakes.length) {
-            view.snake = 0;
-            ++view.generation;
-            //Breed winners
-            const fit = (s) => s.age + s.ate * timeout;
-            snakes = snakes.sort((s0, s1) => fit(s1) - fit(s0));
-            const numTop = Math.ceil(snakes.length / 10), numChild = snakes.length / numTop - 1;
-            for (let i = 0; i < numTop; ++i) {
-                for (let child = 0; child < numChild; ++child) {
-                    snakes[numTop + i * numChild + child].brain = mutant(snakes[i].brain, () => rng.uniform());
-                }
-            }
-            snakes.forEach(s => {
-                s.age = s.ate = 0;
-            });
-        }
-        return;
+        snake.hunger >= timeout) {
+        return "died";
+    }
+    //If snake ate
+    const didEat = head.x == food.x && head.y == food.y;
+    if (didEat) {
+        ++snake.ate;
+        snake.hunger = 0;
+        food.x = Math.floor(rng.uniform() * w);
+        food.y = Math.floor(rng.uniform() * h);
     }
     ++snake.age;
+    ++snake.hunger;
     for (let y = 0; y < body.length; ++y) {
         for (let x = 0; x < body[y].length; ++x) {
             body[y][x] && --body[y][x];
         }
     }
-    body[head.y][head.x] = ate + 2;
+    body[head.y][head.x] = snake.ate + 2;
+    return didEat ? "ate" : "aged";
 }
-function nextFrame(board, info) {
-    nextAct();
-    const { body, head, food, ate, age } = snake;
-    const [height, width] = [body.length, body[0].length];
-    board.clearRect(0, 0, board.canvas.width, board.canvas.height);
-    board.save();
-    board.scale(board.canvas.width / width, board.canvas.height / height);
-    //Draw Snake body & head
-    board.fillStyle = "#000";
-    body.forEach((row, y) => row.forEach((dot, x) => dot && board.fillRect(x, y, 1, 1)));
-    board.fillRect(head.x, head.y, 1, 1);
-    board.fillStyle = "#fff";
-    board.font = ".75px Arial";
-    board.fillText(ate.toString(), head.x, head.y + 0.75);
-    //Draw food
-    board.fillStyle = "#d00";
-    board.fillRect(food.x, food.y, 1, 1);
-    //Draw info
-    info.clearRect(0, 0, info.canvas.width, info.canvas.height);
-    info.fillStyle = "#000";
-    info.font = "12px Arial";
-    info.fillText(JSON.stringify(view), 12, 24);
-    board.restore();
+class SnakeEvolution {
+    constructor() {
+        this.numSnake = 1000;
+        this.numTop = Math.ceil(this.numSnake / 10);
+        this.numChild = this.numSnake / this.numTop - 1;
+        this.rng = new RNG("...");
+        this.population = vec(this.numSnake)
+            .map(n => mutant(brain(12, 12, 4, 2), () => this.rng.uniform()))
+            .map(brain => ({ brain, ate: 0, age: 0 }));
+        this.snake = 0;
+        this.generation = 0;
+        this.liveSnake = birth(this.population[0].brain);
+    }
+    nextAct() {
+        const result = nextState(this.liveSnake);
+        if (result != "died") {
+            return "alive";
+        }
+        //Save snake stats
+        const { brain, ate, age } = this.liveSnake;
+        this.population[this.snake] = { brain, ate, age };
+        //If we've reached the end of the generation
+        if (++this.snake == this.numSnake) {
+            this.snake = this.numTop;
+            ++this.generation;
+            //Breed winners
+            const fit = (s) => s.age + s.ate * timeout;
+            this.population = this.population.sort((s0, s1) => fit(s1) - fit(s0));
+            for (let i = 0; i < this.numTop; ++i) {
+                for (let child = 0; child < this.numChild; ++child) {
+                    this.population[this.numTop + i * this.numChild + child].brain = mutant(this.population[i].brain, () => this.rng.uniform());
+                }
+            }
+            for (let i = this.numTop; i < this.numSnake; ++i) {
+                this.population[i].age = this.population[i].ate = 0;
+            }
+        }
+        //Reset live snake
+        this.liveSnake = birth(this.population[this.snake].brain);
+        return this.snake ? "bred" : "dead";
+    }
 }
 //# sourceMappingURL=SnakeAI.js.map

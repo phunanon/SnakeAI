@@ -8,11 +8,30 @@
         <script src="SnakeAI.js"></script>
         <script src="rng.js"></script>
         <script>
+            let worker, board, info;
+            let replay = {snake: null, generation: null};
+            function nextFrame() {
+                if (!replay.snake) {
+                    return;
+                }
+                if (nextState(replay.snake) == "died") {
+                    replay.snake = null;
+                    worker.postMessage("");
+                    return;
+                }
+                draw(replay.snake, `generation ${replay.generation}`, board, info);
+            }
+            function handleWorkerMessage({data: {generation, brain}}) {
+                replay.generation = generation;
+                replay.snake = birth(brain);
+            }
             function DomLoad() {
-                const board = document.querySelector("#board").getContext("2d");
-                const info = document.querySelector("#info").getContext("2d");
-                initSnakes();
-                setInterval(() => nextFrame(board, info), 10);
+                board = document.querySelector("#board").getContext("2d");
+                info = document.querySelector("#info").getContext("2d");
+                worker = new Worker("EvolutionWorker.js");
+                worker.addEventListener("message", handleWorkerMessage);
+                worker.postMessage("");
+                setInterval(nextFrame, 20);
             }
         </script>
     </head>

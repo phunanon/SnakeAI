@@ -1,48 +1,28 @@
-/// <reference path="Brain.ts" />
+const w = 16,
+    h = 16,
+    timeout = (w + h) * 2;
 
-const timeout = 100,
-    w = 16,
-    h = 16;
-
-declare class RNG {
-    constructor(seed: string);
-    uniform(): number;
-}
-
-type SnakeStats = { ate: number; age: number };
-type LiveSnake = SnakeStats & {
+type BrainStats = { brain: Brain; ate: number; age: number };
+type LiveSnake = BrainStats & {
     head: { x: number; y: number };
     food: { x: number; y: number };
     body: number[][];
     rng: RNG;
+    hunger: number;
 };
-type Snake = SnakeStats & { brain: Brain };
 
-let rng: RNG;
-let snakes: Snake[];
-let defaultSnake: () => LiveSnake;
-let snake: LiveSnake;
+const birth: (brain: Brain) => LiveSnake = (brain: Brain) => ({
+    brain,
+    head: { x: w / 2, y: h / 2 },
+    food: { x: Math.floor(w / 3), y: Math.floor(h / 3) },
+    body: vec(h).map(y => vec(w)),
+    ate: 0,
+    age: 0,
+    hunger: 0,
+    rng: new RNG("."),
+});
 
-function initSnakes() {
-    rng = new RNG("...");
-    snakes = vec(100)
-        .map(n => mutant(brain(12, 12, 4, 2), () => rng.uniform()))
-        .map(brain => ({ brain, ate: 0, age: 0 }));
-    defaultSnake = () => ({
-        head: { x: w / 2, y: h / 2 },
-        food: { x: Math.floor(w / 3), y: Math.floor(h / 3) },
-        body: vec(h).map(y => vec(w)),
-        ate: 0,
-        age: 0,
-        rng: new RNG("."),
-    });
-    snake = defaultSnake();
-}
-
-const view = { generation: 0, snake: 0 };
-
-function think(brain: Brain) {
-    const { head, food, body } = snake;
+function think({ brain, head, food, body }: LiveSnake): number[] {
     const noN = !head.y,
         noE = head.x == w - 1,
         noS = head.y == h - 1,
@@ -64,21 +44,13 @@ function think(brain: Brain) {
     );
 }
 
-function nextAct() {
-    const { brain } = snakes[view.snake];
-    const { head, food, body, ate, age } = snake;
-
-    const [N, E, S, W] = think(brain);
+//Modifies the snake parameter with its next state
+function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
+    const { head, food, body, rng } = snake;
+    const [N, E, S, W] = think(snake);
     const most = Math.max(N, E, S, W);
     head.y += most == S ? 1 : most == N ? -1 : 0;
     head.x += most == N || most == S ? 0 : most == E ? 1 : -1;
-
-    //If snake ate
-    if (head.x == food.x && head.y == food.y) {
-        ++snake.ate;
-        food.x = Math.floor(snake.rng.uniform() * w);
-        food.y = Math.floor(snake.rng.uniform() * h);
-    }
 
     //If snake died
     if (
@@ -87,70 +59,28 @@ function nextAct() {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        age > timeout
+        snake.hunger >= timeout
     ) {
-        //Save snake stats
-        snakes[view.snake++] = { brain, ate: snake.ate, age: snake.age };
-        //Reset snake
-        snake = defaultSnake();
-        //If we've reached the end of the generation
-        if (view.snake == snakes.length) {
-            view.snake = 0;
-            ++view.generation;
-            //Breed winners
-            const fit = (s: Snake) => s.age + s.ate * timeout;
-            snakes = snakes.sort((s0, s1) => fit(s1) - fit(s0));
-            const numTop = Math.ceil(snakes.length / 10),
-                numChild = snakes.length / numTop - 1;
-            for (let i = 0; i < numTop; ++i) {
-                for (let child = 0; child < numChild; ++child) {
-                    snakes[numTop + i * numChild + child].brain = mutant(snakes[i].brain, () =>
-                        rng.uniform(),
-                    );
-                }
-            }
-            snakes.forEach(s => {
-                s.age = s.ate = 0;
-            });
-        }
-        return;
+        return "died";
+    }
+
+    //If snake ate
+    const didEat = head.x == food.x && head.y == food.y;
+    if (didEat) {
+        ++snake.ate;
+        snake.hunger = 0;
+        food.x = Math.floor(rng.uniform() * w);
+        food.y = Math.floor(rng.uniform() * h);
     }
 
     ++snake.age;
+    ++snake.hunger;
     for (let y = 0; y < body.length; ++y) {
         for (let x = 0; x < body[y].length; ++x) {
             body[y][x] && --body[y][x];
         }
     }
-    body[head.y][head.x] = ate + 2;
-}
+    body[head.y][head.x] = snake.ate + 2;
 
-function nextFrame(board: CanvasRenderingContext2D, info: CanvasRenderingContext2D) {
-    nextAct();
-
-    const { body, head, food, ate, age } = snake;
-    const [height, width] = [body.length, body[0].length];
-    board.clearRect(0, 0, board.canvas.width, board.canvas.height);
-    board.save();
-    board.scale(board.canvas.width / width, board.canvas.height / height);
-
-    //Draw Snake body & head
-    board.fillStyle = "#000";
-    body.forEach((row, y) => row.forEach((dot, x) => dot && board.fillRect(x, y, 1, 1)));
-    board.fillRect(head.x, head.y, 1, 1);
-    board.fillStyle = "#fff";
-    board.font = ".75px Arial";
-    board.fillText(ate.toString(), head.x, head.y + 0.75);
-
-    //Draw food
-    board.fillStyle = "#d00";
-    board.fillRect(food.x, food.y, 1, 1);
-
-    //Draw info
-    info.clearRect(0, 0, info.canvas.width, info.canvas.height);
-    info.fillStyle = "#000";
-    info.font = "12px Arial";
-    info.fillText(JSON.stringify(view), 12, 24);
-
-    board.restore();
+    return didEat ? "ate" : "aged";
 }
