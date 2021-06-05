@@ -8,7 +8,7 @@
         <script src="SnakeAI.js"></script>
         <script src="rng.js"></script>
         <script>
-            let worker, board, info;
+            let worker, board;
             let replay = {snake: null, generation: null};
             function nextFrame() {
                 if (!replay.snake) {
@@ -19,7 +19,7 @@
                     worker.postMessage("");
                     return;
                 }
-                draw(replay.snake, `generation ${replay.generation}`, board, info);
+                draw(replay.snake, `generation ${replay.generation}`, board);
             }
             function handleWorkerMessage({data: {generation, brain}}) {
                 replay.generation = generation;
@@ -27,16 +27,14 @@
             }
             function DomLoad() {
                 board = document.querySelector("#board").getContext("2d");
-                info = document.querySelector("#info").getContext("2d");
                 worker = new Worker("EvolutionWorker.js");
                 worker.addEventListener("message", handleWorkerMessage);
                 worker.postMessage("");
-                setInterval(nextFrame, 20);
+                setInterval(nextFrame, 50);
             }
         </script>
     </head>
     <body onload="DomLoad()">
         <canvas id="board" width="500" height="500"></canvas>
-        <canvas id="info" width="300" height="500"></canvas>
     </body>
 </html>
