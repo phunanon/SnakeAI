@@ -31,12 +31,12 @@
                 worker = new Worker("EvolutionWorker.js");
                 worker.addEventListener("message", handleWorkerMessage);
                 worker.postMessage("");
-                setInterval(nextFrame, 20);
+                setInterval(nextFrame, 50);
             }
         </script>
     </head>
     <body onload="DomLoad()">
         <canvas id="board" width="500" height="500"></canvas>
-        <canvas id="info" width="300" height="500"></canvas>
+        <canvas id="info" width="220" height="500"></canvas>
     </body>
 </html>

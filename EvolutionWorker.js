@@ -4,7 +4,7 @@ const sim = new SnakeEvolution();
 let processing = false;
 
 function heavyProcessing() {
-    for (let i = 0; i < 100000; ++i) {
+    for (let i = 0; i < 200000; ++i) {
         sim.nextAct();
     }
 }

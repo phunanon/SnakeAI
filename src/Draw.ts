@@ -10,8 +10,13 @@ function draw(
     board.scale(board.canvas.width / width, board.canvas.height / height);
 
     //Draw Snake body & head
-    board.fillStyle = "#000";
-    body.forEach((row, y) => row.forEach((dot, x) => dot && board.fillRect(x, y, 1, 1)));
+    body.forEach((row, y) =>
+        row.forEach((dot, x) => {
+            board.fillStyle = `rgb(0, ${(dot / (ate + 2)) * 200}, 0)`;
+            dot && board.fillRect(x, y, 1, 1);
+        }),
+    );
+    board.fillStyle = "rgb(0, 200, 0)";
     board.fillRect(head.x, head.y, 1, 1);
 
     //Draw food
@@ -21,7 +26,7 @@ function draw(
     //Draw info
     info.clearRect(0, 0, info.canvas.width, info.canvas.height);
     info.fillStyle = "#000";
-    info.font = "12px Arial";
+    info.font = "14px Arial";
     info.fillText(`ate ${ate}, age ${age}, ${message}`, 12, 24);
 
     drawBrain(brain, info);
@@ -34,12 +39,31 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
     info.save();
     info.translate(32, 48);
     info.scale(24, 24);
-    brain.forEach((l, x) =>
-        l.forEach((n, y) => {
-            let r = n.bias;
-            let R = (r < 0 ? r * -255 : 0), G = (r > 0 ? r * 255 : 0);
+    info.font = ".75px monospace";
+    const matrix = [brain.inputs, ...brain.layers.map(l => l.outputs ?? [])];
+    matrix.forEach((l, x) =>
+        l.forEach((r, y) => {
+            //Biggest
+            if (x == l.length - 1 && r == Math.max(...l)) {
+                info.fillStyle = "#000";
+                info.fillRect(x * margin - 0.1, y * margin - 0.1, margin, margin);
+            }
+            //Output
+            let R = r < 0 ? r * -255 : 0,
+                G = r > 0 ? r * 255 : 0;
             info.fillStyle = `rgb(${255 - G}, ${255 - R}, ${255 - R - G})`;
             info.fillRect(x * margin, y * margin, 1, 1);
+            //Show cardinals for first and last layers
+            if (x != 0 && x != l.length - 1) {
+                return;
+            }
+            info.fillStyle = "#000";
+            let c = y % 4;
+            info.fillText(
+                !c ? "N" : c == 1 ? "E" : c == 2 ? "S" : "W",
+                x * margin + 0.25,
+                y * margin + 0.75,
+            );
         }),
     );
     info.restore();

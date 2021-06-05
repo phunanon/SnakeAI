@@ -38,10 +38,8 @@ function think({ brain, head, food, body }: LiveSnake): number[] {
         !noS && body[head.y + 1][head.x], //Body South
         !noW && body[head.y][head.x - 1], //Body West
     ];
-    return next(
-        brain,
-        inputs.map(b => (b ? 1 : 0)),
-    );
+    brain.inputs = inputs.map(b => (b ? 1 : 0));
+    return next(brain);
 }
 
 //Modifies the snake parameter with its next state
