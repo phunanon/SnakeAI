@@ -6,11 +6,8 @@ const brain = (inputNeurons, hiddenLayerNeurons, outputNeurons, hiddenLayers) =>
     ...vec(hiddenLayers - 1).map(hl => layer(hiddenLayerNeurons)),
     layer(hiddenLayerNeurons, outputNeurons),
 ];
-const next = (layers, inputs) => layers.reduce((inputs, layer) => layer.map(({ bias, weights }) => {
-    let sum = inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias;
-    return sum / (1 + Math.abs(sum));
-}), inputs);
-const mutant = (brain, rn, rate = .2) => brain.map(l => l.map(({ bias, weights }) => ({
+const next = (layers, inputs) => layers.reduce((inputs, layer) => layer.map(({ bias, weights }) => Math.tanh(inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias)), inputs);
+const mutant = (brain, rn, rate = 0.2) => brain.map(l => l.map(({ bias, weights }) => ({
     bias: rn() < rate ? rn() : bias,
     weights: weights.map(w => (rn() < rate ? rn() * 2 - 1 : w)),
 })));

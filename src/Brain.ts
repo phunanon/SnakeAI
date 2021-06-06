@@ -20,14 +20,13 @@ const brain = (
 const next = (layers: Brain, inputs: number[]): number[] =>
     layers.reduce(
         (inputs, layer) =>
-            layer.map(({ bias, weights }) => {
-                let sum = inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias;
-                return sum / (1 + Math.abs(sum));
-            }),
+            layer.map(({ bias, weights }) =>
+                Math.tanh(inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias),
+            ),
         inputs,
     );
 
-const mutant = (brain: Brain, rn: () => number, rate: number = .2): Brain =>
+const mutant = (brain: Brain, rn: () => number, rate: number = 0.2): Brain =>
     brain.map(l =>
         l.map(({ bias, weights }) => ({
             bias: rn() < rate ? rn() : bias,
