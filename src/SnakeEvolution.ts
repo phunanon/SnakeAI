@@ -37,7 +37,7 @@ class SnakeEvolution {
             this.snake = this.numTop;
             ++this.generation;
             //Breed winners
-            const fit = (s: BrainStats) => s.age + s.ate * timeout;
+            const fit = (s: BrainStats) => s.ate * timeout + s.age;
             this.population = this.population.sort((s0, s1) => fit(s1) - fit(s0));
             for (let i = 0; i < this.numTop; ++i) {
                 for (let child = 0; child < this.numChild; ++child) {

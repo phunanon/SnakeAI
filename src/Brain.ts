@@ -26,10 +26,9 @@ const brain = (
 
 const next = ({ layers, inputs }: Brain): number[] => {
     return layers.reduce((inputs, layer) => {
-        layer.outputs = layer.neurons.map(({ bias, weights }) => {
-            let sum = inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias;
-            return sum / (1 + Math.abs(sum));
-        });
+        layer.outputs = layer.neurons.map(({ bias, weights }) =>
+            Math.tanh(inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias),
+        );
         return layer.outputs;
     }, inputs);
 };

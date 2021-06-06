@@ -13,10 +13,7 @@ const brain = (inputNeurons, hiddenLayerNeurons, outputNeurons, hiddenLayers) =>
 });
 const next = ({ layers, inputs }) => {
     return layers.reduce((inputs, layer) => {
-        layer.outputs = layer.neurons.map(({ bias, weights }) => {
-            let sum = inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias;
-            return sum / (1 + Math.abs(sum));
-        });
+        layer.outputs = layer.neurons.map(({ bias, weights }) => Math.tanh(inputs.reduce((sum, input, i) => sum + input * weights[i], 0) + bias));
         return layer.outputs;
     }, inputs);
 };
@@ -56,7 +53,7 @@ function drawBrain(brain, info) {
     const margin = 1.2;
     info.save();
     info.translate(32, 48);
-    info.scale(24, 24);
+    info.scale(30, 30);
     info.font = ".75px monospace";
     const matrix = [brain.inputs, ...brain.layers.map(l => l.outputs ?? [])];
     matrix.forEach((l, x) => l.forEach((r, y) => {
@@ -166,7 +163,7 @@ class SnakeEvolution {
             this.snake = this.numTop;
             ++this.generation;
             //Breed winners
-            const fit = (s) => s.age + s.ate * timeout;
+            const fit = (s) => s.ate * timeout + s.age;
             this.population = this.population.sort((s0, s1) => fit(s1) - fit(s0));
             for (let i = 0; i < this.numTop; ++i) {
                 for (let child = 0; child < this.numChild; ++child) {

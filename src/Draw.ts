@@ -38,7 +38,7 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
     const margin = 1.2;
     info.save();
     info.translate(32, 48);
-    info.scale(24, 24);
+    info.scale(30, 30);
     info.font = ".75px monospace";
     const matrix = [brain.inputs, ...brain.layers.map(l => l.outputs ?? [])];
     matrix.forEach((l, x) =>
