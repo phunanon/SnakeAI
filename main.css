@@ -1,9 +1,10 @@
 body {
-    background-color: #ffe;
+    background-color: #000;
+    color: #fff;
 }
 
 canvas {
-    border: 0.1rem solid #000;
+    border: 0.1rem solid #fff;
 }
 
 @media (max-width: 550px) {

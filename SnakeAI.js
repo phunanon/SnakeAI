@@ -43,7 +43,7 @@ function draw({ brain, body, head, food, ate, age }, title, board, info) {
     board.fillRect(food.x, food.y, 1, 1);
     //Draw info
     info.clearRect(0, 0, info.canvas.width, info.canvas.height);
-    info.fillStyle = "#000";
+    info.fillStyle = "#fff";
     info.font = "14px Arial";
     info.fillText(`${title}`, 12, 20);
     info.fillText(`ate ${ate}, age ${age}`, 12, 38);
@@ -60,12 +60,12 @@ function drawBrain(brain, info) {
     matrix.forEach((l, x) => l.forEach((r, y) => {
         //Biggest
         if (x == l.length - 1 && r == Math.max(...l)) {
-            info.fillStyle = "#000";
+            info.fillStyle = "#fff";
             info.fillRect(x * margin - 0.1, y * margin - 0.1, margin, margin);
         }
         //Output
         let R = r < 0 ? r * -255 : 0, G = r > 0 ? r * 255 : 0;
-        info.fillStyle = `rgb(${255 - G}, ${255 - R}, ${255 - R - G})`;
+        info.fillStyle = `rgb(${R}, ${G}, ${0})`;
         info.fillRect(x * margin, y * margin, 1, 1);
         //Show cardinals for first and last layers
         if (x != 0 && x != l.length - 1) {
