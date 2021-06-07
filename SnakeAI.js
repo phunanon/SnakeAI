@@ -27,9 +27,7 @@ function draw({ body, head, food, ate, age }, message, board) {
     board.fillStyle = "#d00";
     board.fillRect(food.x, food.y, 1, 1);
     //Draw info
-    board.fillStyle = "#000";
-    board.font = ".5px Arial";
-    board.fillText(`ate ${ate}, age ${age}, ${message}`, 0.5, 1);
+    document.title = `ate ${ate}, age ${age}, ${message}`;
     board.restore();
 }
 const w = 16, h = 16, timeout = (w + h) * 2;
@@ -60,7 +58,7 @@ function think({ brain, head, food, body }) {
 }
 //Modifies the snake parameter with its next state
 function nextState(snake) {
-    const { head, food, body, rng } = snake;
+    const { head, food, body, rng, ate } = snake;
     const [N, E, S, W] = think(snake);
     const most = Math.max(N, E, S, W);
     head.y += most == S ? 1 : most == N ? -1 : 0;
@@ -71,7 +69,7 @@ function nextState(snake) {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout) {
+        snake.hunger >= timeout * (ate / 20 + 1)) {
         return "died";
     }
     //If snake ate
@@ -94,7 +92,7 @@ function nextState(snake) {
 }
 class SnakeEvolution {
     constructor() {
-        this.numSnake = 1000;
+        this.numSnake = 50;
         this.numTop = Math.ceil(this.numSnake / 10);
         this.numChild = this.numSnake / this.numTop - 1;
         this.rng = new RNG("...");

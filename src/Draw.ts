@@ -23,9 +23,7 @@ function draw(
     board.fillRect(food.x, food.y, 1, 1);
 
     //Draw info
-    board.fillStyle = "#000";
-    board.font = ".5px Arial";
-    board.fillText(`ate ${ate}, age ${age}, ${message}`, 0.5, 1);
+    document.title = `ate ${ate}, age ${age}, ${message}`;
 
     board.restore();
 }

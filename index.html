@@ -30,7 +30,7 @@
                 worker = new Worker("EvolutionWorker.js");
                 worker.addEventListener("message", handleWorkerMessage);
                 worker.postMessage("");
-                setInterval(nextFrame, 50);
+                setInterval(nextFrame, 20);
             }
         </script>
     </head>
