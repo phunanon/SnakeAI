@@ -26,7 +26,7 @@ const mutant = (brain, rn, rate = 0.2) => ({
     })),
     inputs: brain.inputs,
 });
-function draw({ brain, body, head, food, ate, age }, message, board, info) {
+function draw({ brain, body, head, food, ate, age }, title, board, info) {
     const [height, width] = [body.length, body[0].length];
     board.clearRect(0, 0, board.canvas.width, board.canvas.height);
     board.save();
@@ -45,7 +45,8 @@ function draw({ brain, body, head, food, ate, age }, message, board, info) {
     info.clearRect(0, 0, info.canvas.width, info.canvas.height);
     info.fillStyle = "#000";
     info.font = "14px Arial";
-    info.fillText(`ate ${ate}, age ${age}, ${message}`, 12, 24);
+    info.fillText(`${title}`, 12, 20);
+    info.fillText(`ate ${ate}, age ${age}`, 12, 38);
     drawBrain(brain, info);
     board.restore();
 }
@@ -71,8 +72,7 @@ function drawBrain(brain, info) {
             return;
         }
         info.fillStyle = "#000";
-        let c = y % 4;
-        info.fillText(!c ? "N" : c == 1 ? "E" : c == 2 ? "S" : "W", x * margin + 0.25, y * margin + 0.75);
+        info.fillText("NESW"[y % 4], x * margin + 0.25, y * margin + 0.75);
     }));
     info.restore();
 }
@@ -105,7 +105,7 @@ function think({ brain, head, food, body }) {
 }
 //Modifies the snake parameter with its next state
 function nextState(snake) {
-    const { head, food, body, rng } = snake;
+    const { head, food, body, rng, ate } = snake;
     const [N, E, S, W] = think(snake);
     const most = Math.max(N, E, S, W);
     head.y += most == S ? 1 : most == N ? -1 : 0;
@@ -116,7 +116,7 @@ function nextState(snake) {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout) {
+        snake.hunger >= timeout * (ate / 20 + 1)) {
         return "died";
     }
     //If snake ate
@@ -139,7 +139,7 @@ function nextState(snake) {
 }
 class SnakeEvolution {
     constructor() {
-        this.numSnake = 1000;
+        this.numSnake = 50;
         this.numTop = Math.ceil(this.numSnake / 10);
         this.numChild = this.numSnake / this.numTop - 1;
         this.rng = new RNG("...");

@@ -10,7 +10,7 @@ function heavyProcessing() {
 }
 
 onmessage = function (e) {
-    self.postMessage({ brain: sim.population[0].brain, generation: sim.generation });
+    self.postMessage({ snake: sim.population[0], generation: sim.generation });
 };
 
 setInterval(heavyProcessing, 100);

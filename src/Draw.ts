@@ -1,6 +1,6 @@
 function draw(
     { brain, body, head, food, ate, age }: LiveSnake,
-    message: string,
+    title: string,
     board: CanvasRenderingContext2D,
     info: CanvasRenderingContext2D,
 ) {
@@ -27,7 +27,8 @@ function draw(
     info.clearRect(0, 0, info.canvas.width, info.canvas.height);
     info.fillStyle = "#000";
     info.font = "14px Arial";
-    info.fillText(`ate ${ate}, age ${age}, ${message}`, 12, 24);
+    info.fillText(`${title}`, 12, 20);
+    info.fillText(`ate ${ate}, age ${age}`, 12, 38);
 
     drawBrain(brain, info);
 
@@ -58,9 +59,8 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
                 return;
             }
             info.fillStyle = "#000";
-            let c = y % 4;
             info.fillText(
-                !c ? "N" : c == 1 ? "E" : c == 2 ? "S" : "W",
+                "NESW"[y % 4],
                 x * margin + 0.25,
                 y * margin + 0.75,
             );

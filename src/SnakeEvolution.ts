@@ -4,7 +4,7 @@ declare class RNG {
 }
 
 class SnakeEvolution {
-    numSnake: number = 1000;
+    numSnake: number = 50;
     numTop: number = Math.ceil(this.numSnake / 10);
     numChild: number = this.numSnake / this.numTop - 1;
     rng: RNG;
