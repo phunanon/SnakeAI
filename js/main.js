@@ -39,7 +39,7 @@ function DomLoad() {
     board = document.querySelector("#board").getContext("2d");
     info = document.querySelector("#info").getContext("2d");
     history = document.querySelector("pre");
-    worker = new Worker("EvolutionWorker.js");
+    worker = new Worker("js/EvolutionWorker.js");
     worker.addEventListener("message", handleWorkerMessage);
     worker.postMessage("giveBest");
 }

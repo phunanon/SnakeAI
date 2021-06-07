@@ -1,9 +1,9 @@
 {
-    "include": ["src/*"],
+    "include": ["ts/*"],
     "compilerOptions": {
         "target": "esNext",
         "lib": ["ESNext", "DOM"],
-        "outFile": "./SnakeAI.js",
+        "outFile": "./js/SnakeAI.js",
         "rootDir": "./",
         "strict": true,
         "sourceMap": true
