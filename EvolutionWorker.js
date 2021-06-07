@@ -10,6 +10,9 @@ function heavyProcessing() {
 }
 
 onmessage = function (e) {
+    if (e.data !== "giveBest") {
+        sim.population[0] = e.data;
+    }
     self.postMessage({ snake: sim.population[0], generation: sim.generation });
 };
 

@@ -10,7 +10,7 @@ function nextFrame() {
     draw(replay.snake, `generation ${replay.generation}`, board, info);
     if (result == "died") {
         replay.snake = null;
-        worker.postMessage("");
+        worker.postMessage("giveBest");
     }
 }
 
@@ -41,6 +41,12 @@ function DomLoad() {
     history = document.querySelector("pre");
     worker = new Worker("EvolutionWorker.js");
     worker.addEventListener("message", handleWorkerMessage);
-    worker.postMessage("");
-    frameTimer = setInterval(nextFrame, 20);
+    worker.postMessage("giveBest");
+}
+
+async function DomLoadGood() {
+    const req = await fetch("good-snake.json");
+    const snake = await req.json();
+    worker.postMessage(snake);
+    document.querySelector("p").outerHTML = "";
 }
