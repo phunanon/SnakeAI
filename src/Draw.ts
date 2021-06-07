@@ -58,9 +58,8 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
                 return;
             }
             info.fillStyle = "#000";
-            let c = y % 4;
             info.fillText(
-                !c ? "N" : c == 1 ? "E" : c == 2 ? "S" : "W",
+                "NESWNESWNESW"[y],
                 x * margin + 0.25,
                 y * margin + 0.75,
             );
@@ -68,3 +67,9 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
     );
     info.restore();
 }
+
+const hashBrain = (brain: Brain): string =>
+    new RNG(JSON.stringify(brain))
+        .random(0, Math.pow(16, 4))
+        .toString(16)
+        .padStart(4, "0");

@@ -1,16 +1,7 @@
 importScripts("rng.js", "SnakeAI.js");
 
-const sim = new SnakeEvolution();
-let processing = false;
-
-function heavyProcessing() {
-    for (let i = 0; i < 200000; ++i) {
-        sim.nextAct();
-    }
-}
-
-onmessage = function (e) {
-    self.postMessage({ brain: sim.population[0].brain, generation: sim.generation });
+onmessage = function ({data: {brain, seed}}) {
+    const rng = new RNG(seed);
+    self.postMessage(bestOfBatch(reproduce(20000, brain, rng)));
+    self.close();
 };
-
-setInterval(heavyProcessing, 100);

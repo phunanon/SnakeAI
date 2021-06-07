@@ -71,11 +71,14 @@ function drawBrain(brain, info) {
             return;
         }
         info.fillStyle = "#000";
-        let c = y % 4;
-        info.fillText(!c ? "N" : c == 1 ? "E" : c == 2 ? "S" : "W", x * margin + 0.25, y * margin + 0.75);
+        info.fillText("NESWNESWNESW"[y], x * margin + 0.25, y * margin + 0.75);
     }));
     info.restore();
 }
+const hashBrain = (brain) => new RNG(JSON.stringify(brain))
+    .random(0, Math.pow(16, 4))
+    .toString(16)
+    .padStart(4, "0");
 const w = 16, h = 16, timeout = (w + h) * 2;
 const birth = (brain) => ({
     brain,
@@ -105,7 +108,7 @@ function think({ brain, head, food, body }) {
 }
 //Modifies the snake parameter with its next state
 function nextState(snake) {
-    const { head, food, body, rng } = snake;
+    const { head, food, body, rng, ate } = snake;
     const [N, E, S, W] = think(snake);
     const most = Math.max(N, E, S, W);
     head.y += most == S ? 1 : most == N ? -1 : 0;
@@ -116,7 +119,7 @@ function nextState(snake) {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout) {
+        snake.hunger >= timeout * (ate / 10 + 1)) {
         return "died";
     }
     //If snake ate
@@ -137,46 +140,20 @@ function nextState(snake) {
     body[head.y][head.x] = snake.ate + 2;
     return didEat ? "ate" : "aged";
 }
-class SnakeEvolution {
-    constructor() {
-        this.numSnake = 1000;
-        this.numTop = Math.ceil(this.numSnake / 10);
-        this.numChild = this.numSnake / this.numTop - 1;
-        this.rng = new RNG("...");
-        this.population = vec(this.numSnake)
-            .map(n => mutant(brain(12, 12, 4, 2), () => this.rng.uniform()))
-            .map(brain => ({ brain, ate: 0, age: 0 }));
-        this.snake = 0;
-        this.generation = 0;
-        this.liveSnake = birth(this.population[0].brain);
-    }
-    nextAct() {
-        const result = nextState(this.liveSnake);
-        if (result != "died") {
-            return "alive";
-        }
-        //Save snake stats
-        const { brain, ate, age } = this.liveSnake;
-        this.population[this.snake] = { brain, ate, age };
-        //If we've reached the end of the generation
-        if (++this.snake == this.numSnake) {
-            this.snake = this.numTop;
-            ++this.generation;
-            //Breed winners
-            const fit = (s) => s.ate * timeout + s.age;
-            this.population = this.population.sort((s0, s1) => fit(s1) - fit(s0));
-            for (let i = 0; i < this.numTop; ++i) {
-                for (let child = 0; child < this.numChild; ++child) {
-                    this.population[this.numTop + i * this.numChild + child].brain = mutant(this.population[i].brain, () => this.rng.uniform());
-                }
-            }
-            for (let i = this.numTop; i < this.numSnake; ++i) {
-                this.population[i].age = this.population[i].ate = 0;
-            }
-        }
-        //Reset live snake
-        this.liveSnake = birth(this.population[this.snake].brain);
-        return this.snake ? "bred" : "dead";
-    }
-}
+const fit = (s) => s.ate * timeout + s.age;
+const byFitness = (s0, s1) => fit(s1) - fit(s0);
+const bestOfBatch = (batch) => batch
+    .map(({ brain }) => {
+    const snake = birth(brain);
+    while (nextState(snake) != "died")
+        ;
+    const { ate, age } = snake;
+    return { brain, ate, age };
+})
+    .sort(byFitness)[0];
+const reproduce = (count, brain, rng) => vec(count).map(child => ({
+    brain: mutant(brain, () => rng.uniform()),
+    ate: 0,
+    age: 0,
+}));
 //# sourceMappingURL=SnakeAI.js.map

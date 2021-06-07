@@ -44,7 +44,7 @@ function think({ brain, head, food, body }: LiveSnake): number[] {
 
 //Modifies the snake parameter with its next state
 function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
-    const { head, food, body, rng } = snake;
+    const { head, food, body, rng, ate } = snake;
     const [N, E, S, W] = think(snake);
     const most = Math.max(N, E, S, W);
     head.y += most == S ? 1 : most == N ? -1 : 0;
@@ -57,7 +57,7 @@ function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout
+        snake.hunger >= timeout * (ate / 10 + 1)
     ) {
         return "died";
     }

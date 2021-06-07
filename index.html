@@ -7,40 +7,12 @@
         <title>SnakeAI</title>
         <script src="SnakeAI.js"></script>
         <script src="rng.js"></script>
-        <script>
-            let worker, board, info, history;
-            let replay = {snake: null, generation: null};
-            function nextFrame() {
-                if (!replay.snake) {
-                    return;
-                }
-                if (nextState(replay.snake) == "died") {
-                    const p = n => String(n).padStart(5, " ");
-                    history.innerHTML += `\n${p(replay.generation)} ${p(replay.snake.ate)} ${p(replay.snake.age)}`;
-                    replay.snake = null;
-                    worker.postMessage("");
-                    return;
-                }
-                draw(replay.snake, `generation ${replay.generation}`, board, info);
-            }
-            function handleWorkerMessage({data: {generation, brain}}) {
-                replay.generation = generation;
-                replay.snake = birth(brain);
-            }
-            function DomLoad() {
-                board = document.querySelector("#board").getContext("2d");
-                info = document.querySelector("#info").getContext("2d");
-                history = document.querySelector("pre");
-                worker = new Worker("EvolutionWorker.js");
-                worker.addEventListener("message", handleWorkerMessage);
-                worker.postMessage("");
-                setInterval(nextFrame, 20);
-            }
-        </script>
+        <script src="main.js"></script>
     </head>
     <body onload="DomLoad()">
         <canvas id="board" width="500" height="500"></canvas>
         <canvas id="info" width="220" height="500"></canvas>
-        <pre>  gen   ate   age</pre>
+        <pre> hash   gen   ate   age
+ d512     0</pre>
     </body>
 </html>
