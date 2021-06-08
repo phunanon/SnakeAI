@@ -164,15 +164,13 @@ class SnakeEvolution {
             ++this.generation;
             //Breed winners
             const fit = (s) => s.ate * timeout + s.age;
-            this.population = this.population.sort((s0, s1) => fit(s1) - fit(s0));
-            for (let i = 0; i < this.numTop; ++i) {
-                for (let child = 0; child < this.numChild; ++child) {
-                    this.population[this.numTop + i * this.numChild + child].brain = mutant(this.population[i].brain, () => this.rng.uniform());
-                }
-            }
-            for (let i = this.numTop; i < this.numSnake; ++i) {
-                this.population[i].age = this.population[i].ate = 0;
-            }
+            const top = this.population
+                .sort((s0, s1) => fit(s1) - fit(s0))
+                .slice(0, this.numTop);
+            const rng = () => this.rng.uniform();
+            const offspring = top.flatMap(({ brain }) => vec(this.numChild).map(() => mutant(brain, rng)));
+            const brain2stats = (brain) => ({ brain, ate: 0, age: 0 });
+            this.population = [...top, ...offspring.map(brain2stats)];
         }
         //Reset live snake
         this.liveSnake = birth(this.population[this.snake].brain);
