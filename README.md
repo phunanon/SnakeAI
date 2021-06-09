@@ -10,7 +10,7 @@
 
 *Learning.* Fifty randomised brains are each tested in a snake body until their respective deaths. Once all tested (one generation), the top 10% by a fitness of `ate * timeout + age` produce an equal number of randomly mutated offspring each, repopulating to fifty. Mutation occurs within each neuron, with a 0.2 chance of its bias changing, and a 0.2 chance of its weight changing.
 
-*Development.* Run `tsc` in the working directory and host using a live server. This is required to allow the WebWorker to load.
+*Development.* Run `tsc` in the working directory and host using a live server required to allow the WebWorker to load.
 
 *Branches.* `master` has a live preview of neural activity; `no-info` is a simpler application without this live preview, so easier to study.
 
