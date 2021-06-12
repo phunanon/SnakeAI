@@ -16,7 +16,7 @@ function draw(
             dot && board.fillRect(x, y, 1, 1);
         }),
     );
-    board.fillStyle = "rgb(0, 200, 0)";
+    board.fillStyle = "#0f0";
     board.fillRect(head.x, head.y, 1, 1);
 
     //Draw food

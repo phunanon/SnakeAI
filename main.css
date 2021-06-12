@@ -1,10 +1,19 @@
 body {
     background-color: #000;
     color: #fff;
+    font-family: sans-serif;
 }
 
 canvas {
     border: 0.1rem solid #fff;
+}
+
+p {
+    max-width: 30rem;
+}
+
+a {
+    color: #aaf;
 }
 
 @media (max-width: 550px) {

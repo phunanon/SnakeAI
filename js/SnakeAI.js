@@ -36,7 +36,7 @@ function draw({ brain, body, head, food, ate, age }, title, board, info) {
         board.fillStyle = `rgb(0, ${(dot / (ate + 2)) * 200 + 55}, 0)`;
         dot && board.fillRect(x, y, 1, 1);
     }));
-    board.fillStyle = "rgb(0, 200, 0)";
+    board.fillStyle = "#0f0";
     board.fillRect(head.x, head.y, 1, 1);
     //Draw food
     board.fillStyle = "#d00";
