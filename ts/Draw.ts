@@ -45,7 +45,7 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
     matrix.forEach((l, x) =>
         l.forEach((r, y) => {
             //Biggest
-            if (x == l.length - 1 && r == Math.max(...l)) {
+            if (x == matrix.length - 1 && r == Math.max(...l)) {
                 info.fillStyle = "#fff";
                 info.fillRect(x * px - 0.1, y * px - 0.1, px, px);
             }
@@ -55,7 +55,7 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
             info.fillStyle = `rgb(${R}, ${G}, ${0})`;
             info.fillRect(x * px, y * px, 1, 1);
             //Show cardinals for first and last layers
-            if (x != 0 && x != l.length - 1) {
+            if (x != 0 && x != matrix.length - 1) {
                 return;
             }
             info.fillStyle = "#000";

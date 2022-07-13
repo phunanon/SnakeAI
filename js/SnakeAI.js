@@ -59,7 +59,7 @@ function drawBrain(brain, info) {
     const matrix = [brain.inputs, ...brain.layers.map(l => l.outputs ?? [])];
     matrix.forEach((l, x) => l.forEach((r, y) => {
         //Biggest
-        if (x == l.length - 1 && r == Math.max(...l)) {
+        if (x == matrix.length - 1 && r == Math.max(...l)) {
             info.fillStyle = "#fff";
             info.fillRect(x * px - 0.1, y * px - 0.1, px, px);
         }
@@ -68,7 +68,7 @@ function drawBrain(brain, info) {
         info.fillStyle = `rgb(${R}, ${G}, ${0})`;
         info.fillRect(x * px, y * px, 1, 1);
         //Show cardinals for first and last layers
-        if (x != 0 && x != l.length - 1) {
+        if (x != 0 && x != matrix.length - 1) {
             return;
         }
         info.fillStyle = "#000";
@@ -116,7 +116,7 @@ function nextState(snake) {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout * (ate / 20 + 1)) {
+        snake.hunger >= w * h) {
         return "died";
     }
     //If snake ate
@@ -138,13 +138,18 @@ function nextState(snake) {
     return didEat ? "ate" : "aged";
 }
 class SnakeEvolution {
+    numSnake = 50;
+    numTop = Math.ceil(this.numSnake / 10);
+    numChild = this.numSnake / this.numTop - 1;
+    rng;
+    population;
+    snake;
+    generation;
+    liveSnake;
     constructor() {
-        this.numSnake = 50;
-        this.numTop = Math.ceil(this.numSnake / 10);
-        this.numChild = this.numSnake / this.numTop - 1;
         this.rng = new RNG("...");
         this.population = vec(this.numSnake)
-            .map(n => mutant(brain(12, 12, 4, 2), () => this.rng.uniform()))
+            .map(n => mutant(brain(12, 4, 4, 1), () => this.rng.uniform()))
             .map(brain => ({ brain, ate: 0, age: 0 }));
         this.snake = 0;
         this.generation = 0;
@@ -163,12 +168,12 @@ class SnakeEvolution {
             this.snake = this.numTop;
             ++this.generation;
             //Breed winners
-            const fit = (s) => s.ate * timeout + s.age;
-            const top = this.population
-                .sort((s0, s1) => fit(s1) - fit(s0))
-                .slice(0, this.numTop);
+            const fit = (s0, s1) => s1.ate -
+                s0.ate +
+                (s0.age > s1.age ? -0.5 : s0.age < s1.age ? 0.5 : 0);
+            const top = this.population.sort(fit).slice(0, this.numTop);
             const rng = () => this.rng.uniform();
-            const offspring = top.flatMap(({ brain }) => vec(this.numChild).map(() => mutant(brain, rng)));
+            const offspring = top.flatMap(({ brain }) => vec(this.numChild).map(() => mutant(brain, rng, rng() / 20)));
             const brain2stats = (brain) => ({ brain, ate: 0, age: 0 });
             this.population = [...top, ...offspring.map(brain2stats)];
         }

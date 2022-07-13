@@ -16,7 +16,7 @@ class SnakeEvolution {
     constructor() {
         this.rng = new RNG("...");
         this.population = vec(this.numSnake)
-            .map(n => mutant(brain(12, 12, 4, 2), () => this.rng.uniform()))
+            .map(n => mutant(brain(12, 4, 4, 1), () => this.rng.uniform()))
             .map(brain => ({ brain, ate: 0, age: 0 }));
         this.snake = 0;
         this.generation = 0;
@@ -37,13 +37,14 @@ class SnakeEvolution {
             this.snake = this.numTop;
             ++this.generation;
             //Breed winners
-            const fit = (s: BrainStats) => s.ate * timeout + s.age;
-            const top = this.population
-                .sort((s0, s1) => fit(s1) - fit(s0))
-                .slice(0, this.numTop);
+            const fit = (s0: BrainStats, s1: BrainStats) =>
+                s1.ate -
+                s0.ate +
+                (s0.age > s1.age ? -0.5 : s0.age < s1.age ? 0.5 : 0);
+            const top = this.population.sort(fit).slice(0, this.numTop);
             const rng = () => this.rng.uniform();
             const offspring = top.flatMap(({ brain }) =>
-                vec(this.numChild).map(() => mutant(brain, rng))
+                vec(this.numChild).map(() => mutant(brain, rng, rng() / 20))
             );
             const brain2stats = (brain: Brain) => ({ brain, ate: 0, age: 0 });
             this.population = [...top, ...offspring.map(brain2stats)];

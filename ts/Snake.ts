@@ -57,7 +57,7 @@ function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout * (ate / 20 + 1)
+        snake.hunger >= w * h
     ) {
         return "died";
     }

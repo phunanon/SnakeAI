@@ -32,7 +32,7 @@ function handleWorkerMessage({
         ate
     )} ${p(age)}`;
     clearInterval(frameTimer);
-    frameTimer = setInterval(nextFrame, 60 - ate);
+    frameTimer = setInterval(nextFrame, 50 - ate);
 }
 
 function DomLoad() {
