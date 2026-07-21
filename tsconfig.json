@@ -1,11 +1,22 @@
 {
-    "include": ["ts/*"],
+    "include": [
+        "ts/**/*.ts",
+        "ts/**/*.d.ts"
+    ],
     "compilerOptions": {
-        "target": "esNext",
-        "lib": ["ESNext", "DOM"],
-        "outFile": "./js/SnakeAI.js",
-        "rootDir": "./",
+        "target": "ES2022",
+        "lib": [
+            "ES2022",
+            "DOM"
+        ],
+        "module": "ES2022",
+        "moduleDetection": "force",
+        "rootDir": "./ts",
         "strict": true,
-        "sourceMap": true
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "sourceMap": true,
+        "outDir": "./js",
+        "verbatimModuleSyntax": true
     }
 }

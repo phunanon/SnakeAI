@@ -1,0 +1,24 @@
+{
+  "name": "snakeai",
+  "version": "1.0.0",
+  "description": "![Screenshot of generation 261](Screenshot.png)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phunanon/SnakeAI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/phunanon/SnakeAI/issues"
+  },
+  "homepage": "https://github.com/phunanon/SnakeAI#readme",
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
