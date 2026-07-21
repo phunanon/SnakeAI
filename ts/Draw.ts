@@ -1,5 +1,5 @@
-import type { Brain } from "./Brain.js";
-import type { LiveSnake } from "./Snake.js";
+import type { Brain } from './Brain.js';
+import type { LiveSnake } from './Snake.js';
 
 export function draw(
   { brain, body, head, food, ate, age }: LiveSnake,
@@ -19,17 +19,17 @@ export function draw(
       dot && board.fillRect(x, y, 1, 1);
     }),
   );
-  board.fillStyle = "#0f0";
+  board.fillStyle = '#0f0';
   board.fillRect(head.x, head.y, 1, 1);
 
   //Draw food
-  board.fillStyle = "#d00";
+  board.fillStyle = '#d00';
   board.fillRect(food.x, food.y, 1, 1);
 
   //Draw info
   info.clearRect(0, 0, info.canvas.width, info.canvas.height);
-  info.fillStyle = "#fff";
-  info.font = "14px Arial";
+  info.fillStyle = '#fff';
+  info.font = '14px Arial';
   info.fillText(`${title}`, 12, 20);
   info.fillText(`ate ${ate}, age ${age}`, 12, 38);
 
@@ -43,13 +43,13 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
   info.save();
   info.translate(32, 48);
   info.scale(30, 30);
-  info.font = ".75px monospace";
+  info.font = '.75px monospace';
   const matrix = [brain.inputs, ...brain.layers.map(l => l.outputs ?? [])];
   matrix.forEach((l, x) =>
     l.forEach((r, y) => {
       //Biggest
-      if (x == l.length - 1 && r == Math.max(...l)) {
-        info.fillStyle = "#fff";
+      if (x === matrix.length - 1 && r === Math.max(...l)) {
+        info.fillStyle = '#fff';
         info.fillRect(x * px - 0.1, y * px - 0.1, px, px);
       }
       //Output
@@ -58,11 +58,11 @@ function drawBrain(brain: Brain, info: CanvasRenderingContext2D) {
       info.fillStyle = `rgb(${R}, ${G}, ${0})`;
       info.fillRect(x * px, y * px, 1, 1);
       //Show cardinals for first and last layers
-      if (x != 0 && x != l.length - 1) {
+      if (x != 0 && x !== matrix.length - 1) {
         return;
       }
-      info.fillStyle = "#000";
-      info.fillText("NESW"[y % 4], x * px + 0.25, y * px + 0.75);
+      info.fillStyle = '#000';
+      info.fillText('NESW'[y % 4], x * px + 0.25, y * px + 0.75);
     }),
   );
   info.restore();

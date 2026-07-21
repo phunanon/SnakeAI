@@ -1,6 +1,6 @@
-import { RNG } from "./rng.js";
-import { brain, mutant } from "./Brain.js";
-import { birth, nextState, timeout, } from "./Snake.js";
+import { RNG } from './rng.js';
+import { brain, mutant } from './Brain.js';
+import { birth, nextState, timeout, } from './Snake.js';
 export class SnakeEvolution {
     numSnake = 50;
     numTop = Math.ceil(this.numSnake / 10);
@@ -11,16 +11,16 @@ export class SnakeEvolution {
     generation;
     liveSnake;
     constructor() {
-        this.rng = new RNG("...");
-        this.population = Array.from({ length: this.numSnake }, () => mutant(brain(12, 8, 4, 2), () => this.rng.uniform())).map(brain => ({ brain, ate: 0, age: 0 }));
+        this.rng = new RNG('...');
+        this.population = Array.from({ length: this.numSnake }, () => mutant(brain(12, 4, 4, 2), () => this.rng.uniform())).map(brain => ({ brain, ate: 0, age: 0 }));
         this.snake = 0;
         this.generation = 0;
         this.liveSnake = birth(this.population[0].brain);
     }
     nextAct() {
         const result = nextState(this.liveSnake);
-        if (result != "died") {
-            return "alive";
+        if (result != 'died') {
+            return 'alive';
         }
         //Save snake stats
         const { brain, ate, age } = this.liveSnake;
@@ -41,7 +41,7 @@ export class SnakeEvolution {
         }
         //Reset live snake
         this.liveSnake = birth(this.population[this.snake].brain);
-        return this.snake ? "bred" : "dead";
+        return this.snake ? 'bred' : 'dead';
     }
 }
 //# sourceMappingURL=SnakeEvolution.js.map

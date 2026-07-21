@@ -1,9 +1,9 @@
-import { RNG } from "./rng.js";
-import { next, type Brain, vec } from "./Brain.js";
+import { RNG } from './rng.js';
+import { next, type Brain, vec } from './Brain.js';
 
 export const w = 16;
 export const h = 16;
-export const timeout = (w + h) * 2;
+export const timeout = w * h;
 
 export type BrainStats = { brain: Brain; ate: number; age: number };
 export type LiveSnake = BrainStats & {
@@ -22,10 +22,11 @@ export const birth = (brain: Brain): LiveSnake => ({
   ate: 0,
   age: 0,
   hunger: 0,
-  rng: new RNG("."),
+  rng: new RNG('.'),
 });
 
-export function think({ brain, head, food, body }: LiveSnake): number[] {
+export function think(snake: LiveSnake): number[] {
+  const { brain, head, food, body } = snake;
   const noN = !head.y,
     noE = head.x == w - 1,
     noS = head.y == h - 1,
@@ -46,7 +47,7 @@ export function think({ brain, head, food, body }: LiveSnake): number[] {
 }
 
 //Modifies the snake parameter with its next state
-export function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
+export function nextState(snake: LiveSnake): 'aged' | 'ate' | 'died' {
   const { head, food, body, rng, ate } = snake;
   const [N, E, S, W] = think(snake);
   const most = Math.max(N, E, S, W);
@@ -60,9 +61,9 @@ export function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
     head.y < 0 ||
     head.y == body.length ||
     body[head.y][head.x] ||
-    snake.hunger >= timeout * (ate / 20 + 1)
+    snake.hunger >= timeout
   ) {
-    return "died";
+    return 'died';
   }
 
   //If snake ate
@@ -70,8 +71,10 @@ export function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
   if (didEat) {
     ++snake.ate;
     snake.hunger = 0;
-    food.x = Math.floor(rng.uniform() * w);
-    food.y = Math.floor(rng.uniform() * h);
+    do {
+      food.x = Math.floor(rng.uniform() * w);
+      food.y = Math.floor(rng.uniform() * h);
+    } while (body[food.y][food.x] || (food.x == head.x && food.y == head.y));
   }
 
   ++snake.age;
@@ -83,5 +86,5 @@ export function nextState(snake: LiveSnake): "aged" | "ate" | "died" {
   }
   body[head.y][head.x] = snake.ate + 2;
 
-  return didEat ? "ate" : "aged";
+  return didEat ? 'ate' : 'aged';
 }

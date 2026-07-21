@@ -1,8 +1,8 @@
-import { RNG } from "./rng.js";
-import { next, vec } from "./Brain.js";
+import { RNG } from './rng.js';
+import { next, vec } from './Brain.js';
 export const w = 16;
 export const h = 16;
-export const timeout = (w + h) * 2;
+export const timeout = w * h;
 export const birth = (brain) => ({
     brain,
     head: { x: w / 2, y: h / 2 },
@@ -11,9 +11,10 @@ export const birth = (brain) => ({
     ate: 0,
     age: 0,
     hunger: 0,
-    rng: new RNG("."),
+    rng: new RNG('.'),
 });
-export function think({ brain, head, food, body }) {
+export function think(snake) {
+    const { brain, head, food, body } = snake;
     const noN = !head.y, noE = head.x == w - 1, noS = head.y == h - 1, noW = !head.x;
     const inputs = [
         ...[noN, noE, noS, noW],
@@ -42,16 +43,18 @@ export function nextState(snake) {
         head.y < 0 ||
         head.y == body.length ||
         body[head.y][head.x] ||
-        snake.hunger >= timeout * (ate / 20 + 1)) {
-        return "died";
+        snake.hunger >= timeout) {
+        return 'died';
     }
     //If snake ate
     const didEat = head.x == food.x && head.y == food.y;
     if (didEat) {
         ++snake.ate;
         snake.hunger = 0;
-        food.x = Math.floor(rng.uniform() * w);
-        food.y = Math.floor(rng.uniform() * h);
+        do {
+            food.x = Math.floor(rng.uniform() * w);
+            food.y = Math.floor(rng.uniform() * h);
+        } while (body[food.y][food.x] || (food.x == head.x && food.y == head.y));
     }
     ++snake.age;
     ++snake.hunger;
@@ -61,6 +64,6 @@ export function nextState(snake) {
         }
     }
     body[head.y][head.x] = snake.ate + 2;
-    return didEat ? "ate" : "aged";
+    return didEat ? 'ate' : 'aged';
 }
 //# sourceMappingURL=Snake.js.map
